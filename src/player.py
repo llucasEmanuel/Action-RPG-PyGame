@@ -2,7 +2,7 @@
 import pygame
 
 class Player:
-    def __init__(self) -> None:
+    def __init__(self):
         # Informações do rec do jogador
         self.width = 50
         self.height = 60
@@ -19,6 +19,10 @@ class Player:
         self.jumping = False
         self.g = 1.2  # Gravidade
         self.vy = -14  # Velocidade inicial do pulo
+
+        # Atributos do ataque
+        self.attacking = False
+        self.attack_count = 0 # tempo em que o ataque ocorre
 
     def move(self):
         # Movimentação baseada na última tecla pressionada
@@ -37,13 +41,8 @@ class Player:
         if not self.jumping:
             self.jumping = True
             self.vy = -14
-
-    def draw(self, window: pygame.Surface):
-        pygame.draw.rect(window, self.color, self.rec)
-
-    def update(self, window: pygame.Surface):
-        self.move()
-
+        
+    def jump(self):
         # Lógica do pulo
         if self.jumping:
             self.rec.y += self.vy
@@ -53,5 +52,27 @@ class Player:
                 self.rec.y = 400
                 self.jumping = False
                 self.vy = 0
+
+    def draw_sword(self, window):
+        sword_rec = pygame.Rect(self.rec.x + self.rec.width, self.rec.y + self.rec.height/3, 40, 15)
+        pygame.draw.rect(window, (191, 191, 191), sword_rec)
+    
+    def attack(self, window):
+        # Lógica do ataque
+        if self.attacking:
+            self.draw_sword(window)
+            self.attack_count -= 1
+            if self.attack_count <= 0:
+                self.attacking = False
+
+    def draw(self, window: pygame.Surface):
+        pygame.draw.rect(window, self.color, self.rec)
+
+    def update(self, window: pygame.Surface):
+        self.move()
+
+        self.jump()
+
+        self.attack(window)
 
         self.draw(window)
