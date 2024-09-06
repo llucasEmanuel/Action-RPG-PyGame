@@ -1,9 +1,9 @@
-# Arquivo principal em que o jogo será executado
+# main.py
 import pygame
 from sys import exit
 from player import Player
 
-# Incialização da lib
+# Inicialização da lib
 pygame.init()
 
 # Constantes que armazenam informações da janela
@@ -26,6 +26,7 @@ player = Player()
 while True:
     # Seta o FPS do jogo
     clk.tick(FPS)
+    
     # Checa os eventos ocorridos
     for event in pygame.event.get():
         # Se o evento for um clique no X da janela, fecha o jogo
@@ -38,37 +39,36 @@ while True:
             # [SPACE] = pula
             if event.key == pygame.K_SPACE:
                 player.start_jump()
-            # [d] = anda para a direita
+            # [D] = anda para a direita
             if event.key == pygame.K_d:
-                player.walk_right()
-            # [a] = anda para a esquerda
+                player.going_right = True
+                player.last_key = 'd'  # Atualiza a última tecla pressionada
+            # [A] = anda para a esquerda
             if event.key == pygame.K_a:
-                player.walk_left()
-    
+                player.going_left = True
+                player.last_key = 'a'  # Atualiza a última tecla pressionada
 
-    # Checa se os botões de andar estão sendo segurados
-    if pygame.key.get_pressed()[pygame.K_a]:
-        player.walk_left()
-    else:
-        player.going_left = False
-        
-    if pygame.key.get_pressed()[pygame.K_d]:
-        player.walk_right()
-    else:
-        player.going_right = False
-
+        # Detecta as teclas que foram soltas
+        elif event.type == pygame.KEYUP:
+            if event.key == pygame.K_d:
+                player.going_right = False
+                # Verifica se a tecla A ainda está pressionada para ajustar a direção
+                if pygame.key.get_pressed()[pygame.K_a]:
+                    player.last_key = 'a'
+            if event.key == pygame.K_a:
+                player.going_left = False
+                # Verifica se a tecla D ainda está pressionada para ajustar a direção
+                if pygame.key.get_pressed()[pygame.K_d]:
+                    player.last_key = 'd'
 
     # Limpa o fundo da tela
     window.fill((86, 106, 153))
 
-    # Usar apenas como teste, depois mover para o levels.py
-    pygame.draw.line(window, (0, 0, 0), (0, 400+player.rec.height), (800, 400+player.rec.height))
+    # Desenha a linha do chão (use isto temporariamente)
+    pygame.draw.line(window, (0, 0, 0), (0, 400 + player.rec.height), (800, 400 + player.rec.height))
 
-    # Atualiza pulo do jogador
-    player.update_jump(window)
+    # Atualiza o estado do jogador (movimento, pulo, etc.)
+    player.update(window)
 
-    # Desenha o jogador na janela
-    player.draw(window)
-
-    # Atualiza a janela        
+    # Atualiza a janela
     pygame.display.update()
