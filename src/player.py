@@ -1,4 +1,4 @@
-# responsável por definir o jogador e suas ações
+# player.py
 import pygame
 
 class Player:
@@ -10,38 +10,48 @@ class Player:
         self.rec = pygame.Rect(400, 400, self.width, self.height)
 
         # Atributos do movimento horizontal (andando)
-        self.going_right = False # Flag que checa se está andando para direita
-        self.going_left = False # O mesmo de cima só que para a esquerda (ajuda a suavizar o movimento horizontal)
-        self.vx = 8 # Velocidade
+        self.going_right = False
+        self.going_left = False
+        self.last_key = None  # Indica a última tecla pressionada
+        self.vx = 8  # Velocidade horizontal
 
         # Atributos do movimento vertical (pulando)
         self.jumping = False
-        self.g = 1.2
-        self.vy = -14
+        self.g = 1.2  # Gravidade
+        self.vy = -14  # Velocidade inicial do pulo
+
+    def move(self):
+        # Movimentação baseada na última tecla pressionada
+        if self.going_right and self.last_key == 'd':
+            self.walk_right()
+        elif self.going_left and self.last_key == 'a':
+            self.walk_left()
 
     def walk_right(self):
-        if not self.going_left: # Dá prioridade ao primeiro movimento
-            self.rec.x += self.vx
-            self.going_right = True
+        self.rec.x += self.vx
+
     def walk_left(self):
-        if not self.going_right:
-            self.rec.x -= self.vx
-            self.going_left = True
+        self.rec.x -= self.vx
 
     def start_jump(self):
         if not self.jumping:
             self.jumping = True
             self.vy = -14
 
-    def draw(self, window:pygame.Surface):
+    def draw(self, window: pygame.Surface):
         pygame.draw.rect(window, self.color, self.rec)
-    
-    def update_jump(self, window:pygame.Surface):
+
+    def update(self, window: pygame.Surface):
+        self.move()
+
+        # Lógica do pulo
         if self.jumping:
             self.rec.y += self.vy
             self.vy += self.g
-            # Checa se atingiu o chão (chão = 400 no meu jogo)
+            # Checa se atingiu o chão (400 é a posição do chão)
             if self.rec.y >= 400:
                 self.rec.y = 400
                 self.jumping = False
                 self.vy = 0
+
+        self.draw(window)
