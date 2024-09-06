@@ -47,6 +47,11 @@ while True:
             if event.key == pygame.K_a:
                 player.going_left = True
                 player.last_key = 'a'  # Atualiza a última tecla pressionada
+            # [K] = ataca (usa uma espada de início)
+            if event.key == pygame.K_k and not player.attacking:
+                player.attacking = True
+                player.attack_count = 10
+
 
         # Detecta as teclas que foram soltas
         elif event.type == pygame.KEYUP:
