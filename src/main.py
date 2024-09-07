@@ -53,7 +53,7 @@ while True:
                 player.going_left = True
                 player.last_key = 'a'  # Atualiza a última tecla pressionada
             # [K] = ataca (usa uma espada de início)
-            if event.key == pygame.K_k and not player.attacking:
+            if event.key == pygame.K_k and not player.attacking and not player.is_dead:
                 player.attacking = True
                 player.attack_count = 10
 
@@ -75,13 +75,16 @@ while True:
     window.fill((86, 106, 153))
 
     # Desenha a linha do chão (use isto temporariamente)
-    pygame.draw.line(window, (0, 0, 0), (0, 400 + player.rec.height), (800, 400 + player.rec.height))
+    pygame.draw.line(window, (0, 0, 0), (0, 400 + 60), (800, 400 + 60))
 
     # Desenha inimigo
     enemy.update(window)
 
     # Atualiza o estado do jogador (movimento, pulo, etc.)
-    player.update(window)
+    player.update(window, enemy)
+
+    # Checa se houve colisão entre jogador e inimigo
+    collisions.handle_player_enemy_collision(player, enemy)
 
     # Checa se houve colisão da espada do jogador com o inimigo
     collisions.handle_player_attack_collision(player, enemy)
