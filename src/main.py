@@ -1,7 +1,10 @@
-# main.py
+# Módulo principal
 import pygame
 from sys import exit
 from player import Player
+from enemy import StaticEnemy
+from ui import HUD
+import collisions
 
 # Inicialização da lib
 pygame.init()
@@ -19,8 +22,10 @@ pygame.display.set_caption(WINDOW_TITLE)
 clk = pygame.time.Clock()
 FPS = 60
 
-# Inicialização do jogador
+# Inicialização dos objetos principais
 player = Player()
+enemy = StaticEnemy()
+hud = HUD()
 
 # Loop principal que roda o jogo
 while True:
@@ -66,14 +71,23 @@ while True:
                 if pygame.key.get_pressed()[pygame.K_d]:
                     player.last_key = 'd'
 
-    # Limpa o fundo da tela
+    # Limpa o fundo da tela (Desenhar só depois dessa linha)
     window.fill((86, 106, 153))
 
     # Desenha a linha do chão (use isto temporariamente)
     pygame.draw.line(window, (0, 0, 0), (0, 400 + player.rec.height), (800, 400 + player.rec.height))
 
+    # Desenha inimigo
+    enemy.update(window)
+
     # Atualiza o estado do jogador (movimento, pulo, etc.)
     player.update(window)
+
+    # Checa se houve colisão da espada do jogador com o inimigo
+    collisions.handle_player_attack_collision(player, enemy)
+
+    # Desenha a HUD
+    hud.draw(window, player)
 
     # Atualiza a janela
     pygame.display.update()

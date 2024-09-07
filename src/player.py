@@ -1,4 +1,4 @@
-# player.py
+# Responsável por definir jogador e suas ações
 import pygame
 
 class Player:
@@ -23,6 +23,10 @@ class Player:
         # Atributos do ataque
         self.attacking = False
         self.attack_count = 0 # tempo em que o ataque ocorre
+        self.sword_rec = pygame.Rect(0, 0, 0, 0)
+
+        # Pontuação
+        self.pts = 0
 
     def move(self):
         # Movimentação baseada na última tecla pressionada
@@ -54,9 +58,18 @@ class Player:
                 self.vy = 0
 
     def draw_sword(self, window):
-        sword_rec = pygame.Rect(self.rec.x + self.rec.width, self.rec.y + self.rec.height/3, 40, 15)
-        pygame.draw.rect(window, (191, 191, 191), sword_rec)
-    
+        if self.attacking:
+            # Se o jogador estiver indo para a esquerda, ataca a esquerda
+            if self.last_key == 'a':
+                self.sword_rec = pygame.Rect(self.rec.x - self.rec.width + 10, self.rec.y + self.rec.height/3, 40, 15)
+            # Caso contrário, independente da última tecla, ataca para a direita
+            else:
+                self.sword_rec = pygame.Rect(self.rec.x + self.rec.width, self.rec.y + self.rec.height/3, 40, 15)
+
+            pygame.draw.rect(window, (191, 191, 191), self.sword_rec)
+        else:
+            self.sword_rec = pygame.Rect(0, 0, 0, 0)
+
     def attack(self, window):
         # Lógica do ataque
         if self.attacking:
