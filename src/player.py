@@ -1,6 +1,5 @@
 # Responsável por definir jogador e suas ações
 import pygame
-from physics import Physics
 
 class Player:
     def __init__(self):
@@ -16,10 +15,10 @@ class Player:
         self.last_key = None  # Indica a última tecla pressionada
         self.vx = 8  # Velocidade horizontal
 
-        # Atributos do movimento vertical (pulando)
+        # Atributos do movimento vertical (pulando / caindo)
         self.on_floor = True
-        self.vy = -10  # Velocidade inicial do pulo
         self.jumping = False
+        self.vy = -10  # Velocidade inicial do pulo
 
         # Atributos do ataque
         self.attacking = False
@@ -50,7 +49,7 @@ class Player:
         self.rec.x -= self.vx
 
     def set_jump(self):
-        if not self.jumping:
+        if not self.jumping and self.on_floor:
             self.jumping = True
             self.on_floor = False
             self.vy = -10

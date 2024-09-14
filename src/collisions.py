@@ -6,7 +6,7 @@ def handle_player_attack_collision(player, enemy):
         print("Jogador acertou inimigo")
         if not enemy.is_invincible:
             print("Inimigo vulnerável")
-            enemy.take_damage(damage=3)
+            enemy.take_damage(damage=5)
             if enemy.is_dead:
                 print("Inimigo morreu")
                 player.pts += 10
@@ -19,4 +19,3 @@ def handle_player_enemy_collision(player, enemy):
             player.take_damage(damage=5)
             if player.is_dead:
                 print("Jogador morreu")
-                ...
