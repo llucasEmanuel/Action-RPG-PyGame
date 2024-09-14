@@ -3,7 +3,7 @@ import pygame
 from sys import exit
 from player import Player
 from enemy import StaticEnemy
-from ui import HUD
+from ui import HUD, TitleScreen
 import collisions
 
 # Inicialização da lib
@@ -22,10 +22,14 @@ pygame.display.set_caption(WINDOW_TITLE)
 clk = pygame.time.Clock()
 FPS = 60
 
+# Variáveis auxiliares
+goto_tittle = True
+
 # Inicialização dos objetos principais
 player = Player()
 enemy = StaticEnemy()
 hud = HUD()
+tittle_screen = TitleScreen()
 
 # Loop principal que roda o jogo
 while True:
@@ -38,6 +42,13 @@ while True:
         if event.type == pygame.QUIT:
             pygame.quit()
             exit()
+
+        # Checa se houve clique no mouse
+        if event.type == pygame.MOUSEBUTTONDOWN and goto_tittle:
+            # Detecta o clique do mouse no botão de play da tela de início
+            if tittle_screen.rec_btn.collidepoint(pygame.mouse.get_pos()):
+                goto_tittle = False
+            
         
         # Checa se apertou alguma tecla
         if event.type == pygame.KEYDOWN:
@@ -53,7 +64,7 @@ while True:
                 player.going_left = True
                 player.last_key = 'a'  # Atualiza a última tecla pressionada
             # [K] = ataca (usa uma espada de início)
-            if event.key == pygame.K_k and not player.attacking:
+            if event.key == pygame.K_k and not player.attacking and not player.is_dead:
                 player.attacking = True
                 player.attack_count = 10
 
@@ -71,17 +82,28 @@ while True:
                 if pygame.key.get_pressed()[pygame.K_d]:
                     player.last_key = 'd'
 
+    if goto_tittle:
+        tittle_screen.draw(window)
+        if tittle_screen.rec_btn.collidepoint(pygame.mouse.get_pos()):
+            tittle_screen.color_btn = (0, 30, 20)
+        else:
+            tittle_screen.color_btn = (0, 50, 43)
+        continue
+
     # Limpa o fundo da tela (Desenhar só depois dessa linha)
     window.fill((86, 106, 153))
 
     # Desenha a linha do chão (use isto temporariamente)
-    pygame.draw.line(window, (0, 0, 0), (0, 400 + player.rec.height), (800, 400 + player.rec.height))
+    pygame.draw.line(window, (0, 0, 0), (0, 400 + 60), (800, 400 + 60))
 
     # Desenha inimigo
     enemy.update(window)
 
     # Atualiza o estado do jogador (movimento, pulo, etc.)
-    player.update(window)
+    player.update(window, enemy)
+
+    # Checa se houve colisão entre jogador e inimigo
+    collisions.handle_player_enemy_collision(player, enemy)
 
     # Checa se houve colisão da espada do jogador com o inimigo
     collisions.handle_player_attack_collision(player, enemy)

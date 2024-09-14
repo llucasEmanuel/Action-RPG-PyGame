@@ -13,7 +13,7 @@ class Enemy:
     
     def take_damage(self, damage):
         if not self.is_invincible:
-            # 1 segundo de invencibilidade
+            # 50 segundos de invencibilidade
             self.hp -= damage
             if self.hp <= 0:
                 self.hp = 0
@@ -33,6 +33,9 @@ class Enemy:
                 pygame.draw.rect(window, (101, 145, 85), self.rec)
             else:
                 pygame.draw.rect(window, (64, 87, 55), self.rec)
+        else:
+            self.rec = None
+
 
 
     def update(self, window):

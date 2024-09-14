@@ -25,6 +25,13 @@ class Player:
         self.attack_count = 0 # tempo em que o ataque ocorre
         self.sword_rec = pygame.Rect(0, 0, 0, 0)
 
+        # Atributos de vida e hit
+        self.hp = 20
+        # Quando o player tomar dano ele vai ser movido para trás
+        self.damage_timeout = 0
+        self.is_invincible = False
+        self.is_dead = False
+
         # Pontuação
         self.pts = 0
 
@@ -68,7 +75,7 @@ class Player:
 
             pygame.draw.rect(window, (191, 191, 191), self.sword_rec)
         else:
-            self.sword_rec = pygame.Rect(0, 0, 0, 0)
+            self.sword_rec = None
 
     def attack(self, window):
         # Lógica do ataque
@@ -79,13 +86,41 @@ class Player:
                 self.attacking = False
 
     def draw(self, window: pygame.Surface):
-        pygame.draw.rect(window, self.color, self.rec)
+        if not self.is_dead:
+            pygame.draw.rect(window, self.color, self.rec)
 
-    def update(self, window: pygame.Surface):
-        self.move()
+    def take_damage(self, damage):
+        if not self.is_invincible:
+            self.hp -= damage
+            self.damage_timeout = 30
+            if self.hp <= 0:
+                self.hp = 0
+                self.is_dead = True
+                self.is_invincible = False
+                self.damage_timeout = 0
+                self.rec = pygame.Rect(0, 0, 0, 0)
+            else:
+                # 50 segundos de invencibilidade
+                self.is_invincible = True
 
-        self.jump()
+    def damage_move(self, enemy):
+        # Se colidiu com a metade direita do inimigo, então vai para a direita
+        if self.rec.x > enemy.rec.x:
+            self.rec.x += 3
+        # Caso contrário vai para a esquerda
+        else:
+            self.rec.x -= 3
 
-        self.attack(window)
+        self.damage_timeout -= 1
+        if self.damage_timeout <= 0:
+            self.is_invincible = False
+
+    def update(self, window: pygame.Surface, enemy):
+        if not self.is_invincible:
+            self.move()
+            self.jump()
+            self.attack(window)
+        else:
+            self.damage_move(enemy)
 
         self.draw(window)
