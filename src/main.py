@@ -4,6 +4,7 @@ from sys import exit
 from player import Player
 from enemy import StaticEnemy
 from ui import HUD, TitleScreen
+from physics import Physics
 import collisions
 
 # Inicialização da lib
@@ -30,6 +31,8 @@ player = Player()
 enemy = StaticEnemy()
 hud = HUD()
 tittle_screen = TitleScreen()
+physics = Physics(player)
+
 
 # Loop principal que roda o jogo
 while True:
@@ -54,7 +57,7 @@ while True:
         if event.type == pygame.KEYDOWN:
             # [SPACE] = pula
             if event.key == pygame.K_SPACE:
-                player.start_jump()
+                player.set_jump()
             # [D] = anda para a direita
             if event.key == pygame.K_d:
                 player.going_right = True
@@ -67,7 +70,6 @@ while True:
             if event.key == pygame.K_k and not player.attacking and not player.is_dead:
                 player.attacking = True
                 player.attack_count = 10
-
 
         # Detecta as teclas que foram soltas
         elif event.type == pygame.KEYUP:
@@ -96,9 +98,16 @@ while True:
     # Desenha a linha do chão (use isto temporariamente)
     pygame.draw.line(window, (0, 0, 0), (0, 400 + 60), (800, 400 + 60))
 
+    # Aplica a gravidade aos corpos
+    physics.apply_gravity()
+
     # Desenha inimigo
     enemy.update(window)
 
+    # AINDA É PRECISO RESETAR O STATUS DO INIMIGO QUANDO O PLAYER MORRE (adicionar flag de game over?)
+    # Se o jogador morrer, volta para a tela de titulo
+    if player.is_dead:
+        goto_tittle = True
     # Atualiza o estado do jogador (movimento, pulo, etc.)
     player.update(window, enemy)
 

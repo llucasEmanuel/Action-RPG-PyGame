@@ -1,5 +1,6 @@
 # Responsável por definir jogador e suas ações
 import pygame
+from physics import Physics
 
 class Player:
     def __init__(self):
@@ -16,9 +17,9 @@ class Player:
         self.vx = 8  # Velocidade horizontal
 
         # Atributos do movimento vertical (pulando)
+        self.on_floor = True
+        self.vy = -10  # Velocidade inicial do pulo
         self.jumping = False
-        self.g = 1.2  # Gravidade
-        self.vy = -14  # Velocidade inicial do pulo
 
         # Atributos do ataque
         self.attacking = False
@@ -48,20 +49,19 @@ class Player:
     def walk_left(self):
         self.rec.x -= self.vx
 
-    def start_jump(self):
+    def set_jump(self):
         if not self.jumping:
             self.jumping = True
-            self.vy = -14
-        
-    def jump(self):
-        # Lógica do pulo
-        if self.jumping:
-            self.rec.y += self.vy
-            self.vy += self.g
+            self.on_floor = False
+            self.vy = -10
+
+    def handle_floor_contact(self):
+        if not self.on_floor or self.jumping:
             # Checa se atingiu o chão (400 é a posição do chão)
             if self.rec.y >= 400:
                 self.rec.y = 400
                 self.jumping = False
+                self.on_floor = True
                 self.vy = 0
 
     def draw_sword(self, window):
@@ -116,9 +116,17 @@ class Player:
             self.is_invincible = False
 
     def update(self, window: pygame.Surface, enemy):
+        # Se o jogador morreu, resetar ele
+        if self.is_dead:
+            self.__init__()
+            return
+
+        # Aplica a gravidade no jogador e checa se ele atingiu o chão
+        self.handle_floor_contact()
+        
         if not self.is_invincible:
             self.move()
-            self.jump()
+            # self.jump()
             self.attack(window)
         else:
             self.damage_move(enemy)

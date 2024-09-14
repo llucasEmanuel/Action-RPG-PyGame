@@ -3,7 +3,7 @@ import pygame
 
 class TitleScreen:
     def __init__(self):
-        self.menu_img = pygame.image.load("assets/menu.jpeg")
+        self.menu_img = pygame.image.load("assets/tittle_screen.jpeg")
         # Ajuste da imagem ao tamanho da janela
         self.menu_img = pygame.transform.scale(self.menu_img, (800, 600))
         self.menu_rec = self.menu_img.get_rect()
