@@ -5,13 +5,14 @@ from player import Player
 from enemy import StaticEnemy
 from ui import HUD, TitleScreen
 from physics import Physics
+from levels import Tilemap
 import collisions
 
 # Inicialização da lib
 pygame.init()
 
 # Constantes que armazenam informações da janela
-WINDOW_WIDTH = 800
+WINDOW_WIDTH = 900
 WINDOW_HEIGHT = 600
 WINDOW_TITLE = "Action RPG Game"
 
@@ -32,7 +33,10 @@ enemy = StaticEnemy()
 hud = HUD()
 tittle_screen = TitleScreen()
 physics = Physics(player)
+tilemap = Tilemap()
 
+# Carrega o tilemap
+tilemap.load("assets/tilemaps/tilemap.txt")
 
 # Loop principal que roda o jogo
 while True:
@@ -52,7 +56,6 @@ while True:
             if tittle_screen.rec_btn.collidepoint(pygame.mouse.get_pos()):
                 goto_tittle = False
             
-        
         # Checa se apertou alguma tecla
         if event.type == pygame.KEYDOWN:
             # [SPACE] = pula
@@ -84,19 +87,20 @@ while True:
                 if pygame.key.get_pressed()[pygame.K_d]:
                     player.last_key = 'd'
 
+    # Se a flag de ir para a tela de título for ativada
     if goto_tittle:
+        # Gera a tela de título
         tittle_screen.draw(window)
         if tittle_screen.rec_btn.collidepoint(pygame.mouse.get_pos()):
             tittle_screen.color_btn = (0, 30, 20)
         else:
             tittle_screen.color_btn = (0, 50, 43)
+        # Não executa as outras operações, pois são desnecessárias nesse estado
         continue
 
-    # Limpa o fundo da tela (Desenhar só depois dessa linha)
-    window.fill((86, 106, 153))
-
-    # Desenha a linha do chão (use isto temporariamente)
-    pygame.draw.line(window, (0, 0, 0), (0, 400 + 60), (800, 400 + 60))
+    
+    # Desenha o tilemap e retorna uma lista de plataformas em que há colisão
+    platforms = tilemap.draw(window)
 
     # Aplica a gravidade aos corpos
     physics.apply_gravity()
@@ -109,7 +113,10 @@ while True:
     if player.is_dead:
         goto_tittle = True
     # Atualiza o estado do jogador (movimento, pulo, etc.)
-    player.update(window, enemy)
+    player.update(window, enemy, platforms)
+
+    # Usado para debugar a colisão com plataformas
+    print(player.on_floor)
 
     # Checa se houve colisão entre jogador e inimigo
     collisions.handle_player_enemy_collision(player, enemy)

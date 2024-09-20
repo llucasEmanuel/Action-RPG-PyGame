@@ -7,7 +7,8 @@ class Player:
         self.width = 50
         self.height = 60
         self.color = (209, 104, 227)
-        self.rec = pygame.Rect(400, 400, self.width, self.height)
+        # O jogador é gerado no ar e cai até atingir uma plataforma
+        self.rec = pygame.Rect(210, 300, self.width, self.height)
 
         # Atributos do movimento horizontal (andando)
         self.going_right = False
@@ -16,9 +17,9 @@ class Player:
         self.vx = 8  # Velocidade horizontal
 
         # Atributos do movimento vertical (pulando / caindo)
-        self.on_floor = True
-        self.jumping = False
-        self.vy = -10  # Velocidade inicial do pulo
+        self.on_floor = False
+        self.jumping = True
+        self.vy = 0  # Velocidade inicial do pulo
 
         # Atributos do ataque
         self.attacking = False
@@ -54,14 +55,44 @@ class Player:
             self.on_floor = False
             self.vy = -10
 
-    def handle_floor_contact(self):
-        if not self.on_floor or self.jumping:
-            # Checa se atingiu o chão (400 é a posição do chão)
-            if self.rec.y >= 400:
-                self.rec.y = 400
-                self.jumping = False
+    # Tentar implementar a colisão usando dx e dy depois
+    def handle_floor_contact(self, platforms):
+        # Supõe que não colidiu com nenhuma plataforma
+        collided = False
+
+        # Verifica a colisão do jogador com as plataformas
+        for platform in platforms:
+            if platform.colliderect(self.rec):
+                # Colide com a plataforma vindo de cima (caindo)
+                if self.vy > 0:
+                    collided = True
+                    self.rec.bottom = platform.top
+                    self.vy = 0
+                    self.jumping = False
+                    self.on_floor = True
+                # Colide com a plataforma vindo de baixo (subindo)
+                elif self.vy < 0:
+                    self.rec.top = platform.bottom
+                    self.vy = 0
+                    
+
+        # Retângulo abaixo do jogador que checa presença de plataformas
+        sensor_rect = pygame.Rect(self.rec.left, self.rec.bottom + 1, self.rec.width, 1)
+
+        # Verifica se o sensor abaixo do jogador ainda está tocando alguma plataforma
+        if not collided:
+            # Verifica se há colisão com pelo menos uma plataforma
+            if any(platform.colliderect(sensor_rect) for platform in platforms):
                 self.on_floor = True
-                self.vy = 0
+                self.jumping = False
+            else:
+                # Se o sensor não colide com nenhuma plataforma, o jogador está no ar
+                self.on_floor = False
+                self.jumping = True  # Permite pular após cair
+
+        # Se o jogador não está no chão, ele pode cair
+        if not self.on_floor:
+            self.jumping = True
 
     def draw_sword(self, window):
         if self.attacking:
@@ -114,14 +145,14 @@ class Player:
         if self.damage_timeout <= 0:
             self.is_invincible = False
 
-    def update(self, window: pygame.Surface, enemy):
+    def update(self, window: pygame.Surface, enemy, platforms):
         # Se o jogador morreu, resetar ele
         if self.is_dead:
             self.__init__()
             return
 
         # Aplica a gravidade no jogador e checa se ele atingiu o chão
-        self.handle_floor_contact()
+        self.handle_floor_contact(platforms)
         
         if not self.is_invincible:
             self.move()
