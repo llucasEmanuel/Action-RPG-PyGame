@@ -58,34 +58,34 @@ while True:
             
         # Checa se apertou alguma tecla
         if event.type == pygame.KEYDOWN:
-            # [SPACE] = pula
-            if event.key == pygame.K_SPACE:
-                player.set_jump()
-            # [D] = anda para a direita
-            if event.key == pygame.K_d:
-                player.going_right = True
-                player.last_key = 'd'  # Atualiza a última tecla pressionada
-            # [A] = anda para a esquerda
-            if event.key == pygame.K_a:
-                player.going_left = True
-                player.last_key = 'a'  # Atualiza a última tecla pressionada
+            # # [SPACE] = pula
+            # if event.key == pygame.K_SPACE:k
+            #     player.set_jump()
+            # # [D] = anda para a direita
+            # if event.key == pygame.K_d:
+            #     player.going_right = True
+            #     player.last_key = 'd'  # Atualiza a última tecla pressionada
+            # # [A] = anda para a esquerda
+            # if event.key == pygame.K_a:
+            #     player.going_left = True
+            #     player.last_key = 'a'  # Atualiza a última tecla pressionada
             # [K] = ataca (usa uma espada de início)
             if event.key == pygame.K_k and not player.attacking and not player.is_dead:
                 player.attacking = True
                 player.attack_count = 10
 
-        # Detecta as teclas que foram soltas
-        elif event.type == pygame.KEYUP:
-            if event.key == pygame.K_d:
-                player.going_right = False
-                # Verifica se a tecla A ainda está pressionada para ajustar a direção
-                if pygame.key.get_pressed()[pygame.K_a]:
-                    player.last_key = 'a'
-            if event.key == pygame.K_a:
-                player.going_left = False
-                # Verifica se a tecla D ainda está pressionada para ajustar a direção
-                if pygame.key.get_pressed()[pygame.K_d]:
-                    player.last_key = 'd'
+        # # Detecta as teclas que foram soltas
+        # elif event.type == pygame.KEYUP:
+        #     if event.key == pygame.K_d:
+        #         player.going_right = False
+        #         # Verifica se a tecla A ainda está pressionada para ajustar a direção
+        #         if pygame.key.get_pressed()[pygame.K_a]:
+        #             player.last_key = 'a'
+        #     if event.key == pygame.K_a:
+        #         player.going_left = False
+        #         # Verifica se a tecla D ainda está pressionada para ajustar a direção
+        #         if pygame.key.get_pressed()[pygame.K_d]:
+        #             player.last_key = 'd'
 
     # Se a flag de ir para a tela de título for ativada
     if goto_tittle:
@@ -102,9 +102,6 @@ while True:
     # Desenha o tilemap e retorna uma lista de plataformas em que há colisão
     platforms = tilemap.draw(window)
 
-    # Aplica a gravidade aos corpos
-    physics.apply_gravity()
-
     # Desenha inimigo
     enemy.update(window)
 
@@ -113,10 +110,7 @@ while True:
     if player.is_dead:
         goto_tittle = True
     # Atualiza o estado do jogador (movimento, pulo, etc.)
-    player.update(window, enemy, platforms)
-
-    # Usado para debugar a colisão com plataformas
-    print(player.on_floor)
+    player.update(window, enemy)
 
     # Checa se houve colisão entre jogador e inimigo
     collisions.handle_player_enemy_collision(player, enemy)

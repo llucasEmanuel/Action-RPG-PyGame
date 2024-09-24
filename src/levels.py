@@ -8,9 +8,7 @@ class Tilemap:
     def __init__(self):
         # Armazena os tiles em um dicionário em que a chave é o nome do arquivo sem o .png
         self.tile_dict = {}
-        self.tile_dict["grass1"] = pygame.image.load("assets/tiles/grass1.png")
-        self.tile_dict["grass2"] = pygame.image.load("assets/tiles/grass2.png")
-        self.tile_dict["sky1"] = pygame.image.load("assets/tiles/sky1.png")
+        self.tile_dict["stone1"] = pygame.image.load("assets/tiles/stone1.png")
 
         # Matriz correspondente ao arquivo de texto do tilemap
         self.matrix = []
@@ -33,12 +31,6 @@ class Tilemap:
                 
                 # Checa qual o tile correspondente e determina se haverá colisão ou não com ele
                 if tile == '0':
-                    window.blit(self.tile_dict["sky1"], (x, y))
-                elif tile == '1':
-                    window.blit(self.tile_dict["grass1"], (x, y))
-                    tiles.append(pygame.Rect(x, y, TILE_SIZE, TILE_SIZE))
-                else:
-                    window.blit(self.tile_dict["grass2"], (x, y))
-                    tiles.append(pygame.Rect(x, y, TILE_SIZE, TILE_SIZE))
+                    window.blit(self.tile_dict["stone1"], (x, y))
         # Tiles que devem ser considerados para colisão
         return tiles

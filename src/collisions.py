@@ -12,6 +12,18 @@ def handle_player_attack_collision(player, enemy):
                 player.pts += 10
 
 def handle_player_enemy_collision(player, enemy):
+    if player.is_invincible and not player.is_dead:
+        # Se colidiu com a metade direita do inimigo, então vai para a direita
+        if player.rec.x > enemy.rec.x:
+            player.rec.x += 3
+        # Caso contrário vai para a esquerda
+        else:
+            player.rec.x -= 3
+
+        player.damage_timeout -= 1
+        if player.damage_timeout <= 0:
+            player.is_invincible = False
+
     if not player.is_dead and not enemy.is_dead and player.rec.colliderect(enemy.rec):
         print("Inimigo acertou o jogador")
         if not player.is_invincible:

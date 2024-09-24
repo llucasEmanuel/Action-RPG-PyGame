@@ -10,20 +10,16 @@ class Player:
         # O jogador é gerado no ar e cai até atingir uma plataforma
         self.rec = pygame.Rect(210, 300, self.width, self.height)
 
-        # Atributos do movimento horizontal (andando)
-        self.going_right = False
-        self.going_left = False
-        self.last_key = None  # Indica a última tecla pressionada
-        self.vx = 8  # Velocidade horizontal
+        # Vetor que indica a a direção da velocidade
+        self.velocity = pygame.math.Vector2(0, 0)
+        self.speed = 7
 
-        # Atributos do movimento vertical (pulando / caindo)
-        self.on_floor = False
-        self.jumping = True
-        self.vy = 0  # Velocidade inicial do pulo
+        # Atributos do movimento (andando)
+        self.last_key = None  # Indica a última tecla pressionada
 
         # Atributos do ataque
         self.attacking = False
-        self.attack_count = 0 # tempo em que o ataque ocorre
+        self.attack_count = 0 # Tempo em que o ataque ocorre
         self.sword_rec = pygame.Rect(0, 0, 0, 0)
 
         # Atributos de vida e hit
@@ -36,70 +32,53 @@ class Player:
         # Pontuação
         self.pts = 0
 
+    # Gerencia a movimentação do jogador
     def move(self):
-        # Movimentação baseada na última tecla pressionada
-        if self.going_right and self.last_key == 'd':
-            self.walk_right()
-        elif self.going_left and self.last_key == 'a':
-            self.walk_left()
+        # Reseta a velocidade e os boolanos de direção
+        self.velocity = pygame.math.Vector2(0, 0)
 
-    def walk_right(self):
-        self.rec.x += self.vx
+        # Direção da velocidade
+        dv = pygame.math.Vector2(0, 0)
 
-    def walk_left(self):
-        self.rec.x -= self.vx
+        # Seleciona a direção em que o jogador vai andar
+        key = pygame.key.get_pressed()
 
-    def set_jump(self):
-        if not self.jumping and self.on_floor:
-            self.jumping = True
-            self.on_floor = False
-            self.vy = -10
+        if key[pygame.K_w]:
+            dv.y -= 1
+            self.last_key = 'w'
 
-    # Tentar implementar a colisão usando dx e dy depois
-    def handle_floor_contact(self, platforms):
-        # Supõe que não colidiu com nenhuma plataforma
-        collided = False
+        if key[pygame.K_s]:
+            dv.y += 1
+            self.last_key = 's'
 
-        # Verifica a colisão do jogador com as plataformas
-        for platform in platforms:
-            if platform.colliderect(self.rec):
-                # Colide com a plataforma vindo de cima (caindo)
-                if self.vy > 0:
-                    collided = True
-                    self.rec.bottom = platform.top
-                    self.vy = 0
-                    self.jumping = False
-                    self.on_floor = True
-                # Colide com a plataforma vindo de baixo (subindo)
-                elif self.vy < 0:
-                    self.rec.top = platform.bottom
-                    self.vy = 0
-                    
+        if key[pygame.K_a]:
+            dv.x -= 1
+            self.last_key = 'a'
 
-        # Retângulo abaixo do jogador que checa presença de plataformas
-        sensor_rect = pygame.Rect(self.rec.left, self.rec.bottom + 1, self.rec.width, 1)
+        if key[pygame.K_d]:
+            dv.x += 1
+            self.last_key = 'd'
 
-        # Verifica se o sensor abaixo do jogador ainda está tocando alguma plataforma
-        if not collided:
-            # Verifica se há colisão com pelo menos uma plataforma
-            if any(platform.colliderect(sensor_rect) for platform in platforms):
-                self.on_floor = True
-                self.jumping = False
-            else:
-                # Se o sensor não colide com nenhuma plataforma, o jogador está no ar
-                self.on_floor = False
-                self.jumping = True  # Permite pular após cair
+        
+        # Checa se existe velocidade em alguma direção, se não a velocidade continua 0, pois foi resetada no início do método
+        if dv.length() > 0:
+            # Normaliza o vetor dv para conservar o módulo da velocidade em todas as direções
+            self.velocity = dv.normalize() * self.speed
 
-        # Se o jogador não está no chão, ele pode cair
-        if not self.on_floor:
-            self.jumping = True
+        # Atualiza a posição do retângulo
+        self.rec.x += self.velocity.x
+        self.rec.y += self.velocity.y
 
     def draw_sword(self, window):
         if self.attacking:
-            # Se o jogador estiver indo para a esquerda, ataca a esquerda
-            if self.last_key == 'a':
+            # Desenha a espada dependendo da posição para onde o jogador anda
+            if self.last_key == 'w':
+                self.sword_rec = pygame.Rect(self.rec.x + self.rec.width/3 + 2, self.rec.y - 30, 15, 32)
+            elif self.last_key == 's':
+                self.sword_rec = pygame.Rect(self.rec.x + self.rec.width/3 + 2, self.rec.y + self.rec.height, 15, 32)
+            elif self.last_key == 'a':
                 self.sword_rec = pygame.Rect(self.rec.x - self.rec.width + 10, self.rec.y + self.rec.height/3, 40, 15)
-            # Caso contrário, independente da última tecla, ataca para a direita
+            # Caso contrário, ataca para a direita
             else:
                 self.sword_rec = pygame.Rect(self.rec.x + self.rec.width, self.rec.y + self.rec.height/3, 40, 15)
 
@@ -133,32 +112,17 @@ class Player:
                 # 50 segundos de invencibilidade
                 self.is_invincible = True
 
-    def damage_move(self, enemy):
-        # Se colidiu com a metade direita do inimigo, então vai para a direita
-        if self.rec.x > enemy.rec.x:
-            self.rec.x += 3
-        # Caso contrário vai para a esquerda
-        else:
-            self.rec.x -= 3
-
-        self.damage_timeout -= 1
-        if self.damage_timeout <= 0:
-            self.is_invincible = False
-
-    def update(self, window: pygame.Surface, enemy, platforms):
+    def update(self, window: pygame.Surface, enemy):
         # Se o jogador morreu, resetar ele
         if self.is_dead:
             self.__init__()
             return
-
-        # Aplica a gravidade no jogador e checa se ele atingiu o chão
-        self.handle_floor_contact(platforms)
         
         if not self.is_invincible:
             self.move()
-            # self.jump()
             self.attack(window)
         else:
-            self.damage_move(enemy)
+            ...#self.damage_move(enemy)
+            
 
         self.draw(window)

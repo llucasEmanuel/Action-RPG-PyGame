@@ -12,7 +12,7 @@ class Physics:
     def apply_gravity(self):
         # Se o jogador estiver no ar (independente se está pulando ou não)
         if not self.player.on_floor:
-            self.player.rec.y += self.player.vy
+            # self.player.rec.y += self.player.vy
             self.player.vy += self.gravity
             if self.player.vy > self.max_fall_speed:
                 self.player.vy = self.max_fall_speed
