@@ -22,7 +22,7 @@ class TitleScreen:
         window.blit(self.menu_img, self.menu_rec)
         # window.blit(self.tittle_img, (270, -70))
         pygame.draw.rect(window, self.color_btn, self.rec_btn)
-        window.blit(self.surface_text_btn, (400, 450))
+        window.blit(self.surface_text_btn, (412, 443))
 
         pygame.display.update()
 

@@ -32,6 +32,26 @@ class Player:
         # Pontuação
         self.pts = 0
 
+        # Carrega os sprites do jogador e os armazena em um dicionário
+        self.sprites_dict = {
+            "up": {
+                "idle": pygame.image.load("assets/felicia_up1.png"),
+            },
+            "down": {
+                "idle": pygame.image.load("assets/felicia_down1.png"),
+            },
+            "left": {
+                "idle": pygame.image.load("assets/felicia_left1.png"),
+            },
+            "right": {
+                "idle": pygame.image.load("assets/felicia_right1.png"),
+            },
+        }
+
+        self.state = "idle"
+        self.direction = "right"
+        self.curr_sprite = self.sprites_dict["right"]["idle"]
+
     # Gerencia a movimentação do jogador
     def move(self):
         # Reseta a velocidade e os boolanos de direção
@@ -46,18 +66,23 @@ class Player:
         if key[pygame.K_w]:
             dv.y -= 1
             self.last_key = 'w'
+            self.direction = "up"
 
         if key[pygame.K_s]:
             dv.y += 1
             self.last_key = 's'
+            self.direction = "down"
+
 
         if key[pygame.K_a]:
             dv.x -= 1
             self.last_key = 'a'
+            self.direction = "left"
 
         if key[pygame.K_d]:
             dv.x += 1
             self.last_key = 'd'
+            self.direction = "right"
 
         
         # Checa se existe velocidade em alguma direção, se não a velocidade continua 0, pois foi resetada no início do método
@@ -96,7 +121,9 @@ class Player:
 
     def draw(self, window: pygame.Surface):
         if not self.is_dead:
+            self.curr_sprite = self.sprites_dict[self.direction][self.state]
             pygame.draw.rect(window, self.color, self.rec)
+            window.blit(self.curr_sprite, (self.rec.x, self.rec.y))
 
     def take_damage(self, damage):
         if not self.is_invincible:
