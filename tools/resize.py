@@ -32,7 +32,7 @@ def resize_png(file_path:str = None, scale:int = 1):
 
 
 # Substituir as variáveis para selecionar o arquivo e escala corretos
-file_path = "assets/tittle.png"
-scale = 3
+file_path = "assets/sprites/felicia/spritesheet_felicia.png"
+scale = 2
 if __name__ == "__main__":
     resize_png(file_path, scale)
