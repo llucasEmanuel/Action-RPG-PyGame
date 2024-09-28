@@ -22,7 +22,7 @@ pygame.display.set_caption(WINDOW_TITLE)
 
 # Clock para controlar o FPS
 clk = pygame.time.Clock()
-FPS = 60
+FPS = 35
 
 # Variáveis auxiliares
 goto_tittle = True
@@ -95,10 +95,9 @@ while True:
             tittle_screen.color_btn = (0, 30, 20)
         else:
             tittle_screen.color_btn = (0, 50, 43)
-        # Não executa as outras operações, pois são desnecessárias nesse estado
+        # Não executa as outras operações, poisa são desnecessárias nesse estado
         continue
 
-    
     # Desenha o tilemap e retorna uma lista de plataformas em que há colisão
     platforms = tilemap.draw(window)
 

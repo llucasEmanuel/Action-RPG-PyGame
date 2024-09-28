@@ -1,15 +1,9 @@
 # Responsável por definir jogador e suas ações
 import pygame
+from animations import Animation
 
 class Player:
     def __init__(self):
-        # Informações do rec do jogador
-        self.width = 50
-        self.height = 60
-        self.color = (209, 104, 227)
-        # O jogador é gerado no ar e cai até atingir uma plataforma
-        self.rec = pygame.Rect(210, 300, self.width, self.height)
-
         # Vetor que indica a a direção da velocidade
         self.velocity = pygame.math.Vector2(0, 0)
         self.speed = 7
@@ -32,25 +26,23 @@ class Player:
         # Pontuação
         self.pts = 0
 
-        # Carrega os sprites do jogador e os armazena em um dicionário
-        self.sprites_dict = {
-            "up": {
-                "idle": pygame.image.load("assets/sprites/felicia/felicia_up_idle.png"),
-            },
-            "down": {
-                "idle": pygame.image.load("assets/sprites/felicia/felicia_down_idle.png"),
-            },
-            "left": {
-                "idle": pygame.image.load("assets/sprites/felicia/felicia_left_idle.png"),
-            },
-            "right": {
-                "idle": pygame.image.load("assets/sprites/felicia/felicia_right_idle.png"),
-            },
+        # Animação dos sprites
+        spritesheet = pygame.image.load("assets/sprites/felicia/spritesheet.png").convert_alpha()
+        self.animations = {
+            "up": Animation(spritesheet, 8),
+            "left": Animation(spritesheet, 9),
+            "down": Animation(spritesheet, 10),
+            "right": Animation(spritesheet, 11),
         }
 
         self.state = "idle"
         self.direction = "right"
-        self.curr_sprite = self.sprites_dict["right"]["idle"]
+
+        # Informações do rec do jogador
+        self.width, self.height = self.animations[self.direction].get_curr_frame_shape()
+        self.color = (209, 104, 227)
+        # Depois mudar as dimensões para melhorar a hitbox
+        self.rec = pygame.Rect(210, 300, self.width, self.height)
 
     # Gerencia a movimentação do jogador
     def move(self):
@@ -63,6 +55,13 @@ class Player:
         # Seleciona a direção em que o jogador vai andar
         key = pygame.key.get_pressed()
 
+        # Atualiza o estado jogador
+        if key[pygame.K_w] or key[pygame.K_a] or \
+           key[pygame.K_s] or key[pygame.K_d]:
+            self.state = "moving"
+        else:
+            self.state = "idle"
+
         if key[pygame.K_w]:
             dv.y -= 1
             self.last_key = 'w'
@@ -72,7 +71,6 @@ class Player:
             dv.y += 1
             self.last_key = 's'
             self.direction = "down"
-
 
         if key[pygame.K_a]:
             dv.x -= 1
@@ -102,7 +100,7 @@ class Player:
             elif self.last_key == 's':
                 self.sword_rec = pygame.Rect(self.rec.x + self.rec.width/3 + 2, self.rec.y + self.rec.height, 15, 32)
             elif self.last_key == 'a':
-                self.sword_rec = pygame.Rect(self.rec.x - self.rec.width + 17, self.rec.y + self.rec.height/3, 40, 15)
+                self.sword_rec = pygame.Rect(self.rec.x - self.rec.width/3 + 3, self.rec.y + self.rec.height/3, 40, 15)
             # Caso contrário, ataca para a direita
             else:
                 self.sword_rec = pygame.Rect(self.rec.x + self.rec.width - 1, self.rec.y + self.rec.height/3, 40, 15)
@@ -121,11 +119,15 @@ class Player:
 
     def draw(self, window: pygame.Surface):
         if not self.is_dead:
-            self.curr_sprite = self.sprites_dict[self.direction][self.state]
+            # Desenha o rec do sprite
             pygame.draw.rect(window, self.color, self.rec, 1)
-            self.rec.width = self.curr_sprite.get_width()
-            self.rec.height = self.curr_sprite.get_height()
-            window.blit(self.curr_sprite, (self.rec.x, self.rec.y))
+
+            if self.state == "moving":
+                self.animations[self.direction].update()
+            elif self.state == "idle":
+                self.animations[self.direction].set_idle()
+                
+            self.animations[self.direction].draw(window, self.rec.x, self.rec.y)
 
     def take_damage(self, damage):
         if not self.is_invincible:
