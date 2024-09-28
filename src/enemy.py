@@ -5,7 +5,7 @@ class Enemy:
     def __init__(self, hp:int):
         self.hp = hp
         self.is_dead = False
-        self.rec = pygame.Rect(600, 400, 50, 60)
+        self.rec = pygame.Rect(600, 640 - 224 - 60, 50, 60)
         # Contador que deixa o inimigo invulnerável por um tempo após receber dano
         self.damage_timeout = 0
         # Indica se o inimigo está em estado de invencibilidade

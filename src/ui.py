@@ -3,15 +3,15 @@ import pygame
 
 class TitleScreen:
     def __init__(self):
-        self.menu_img = pygame.image.load("assets/menu.jpeg")
+        self.menu_img = pygame.image.load("assets/tittle_screen.jpeg")
         # Ajuste da imagem ao tamanho da janela
-        self.menu_img = pygame.transform.scale(self.menu_img, (800, 600))
+        self.menu_img = pygame.transform.scale(self.menu_img, (900, 600))
         self.menu_rec = self.menu_img.get_rect()
 
         self.tittle_img = pygame.image.load("assets/tittle.png")
         self.tittle_img = pygame.transform.scale(self.tittle_img, (360, 360))
 
-        self.rec_btn = pygame.Rect(325, 420, 165, 100)
+        self.rec_btn = pygame.Rect(375, 420, 165, 100)
         self.color_btn = (0, 50, 43)
         self.font_btn = pygame.font.SysFont("arial", 45)
         self.surface_text_btn = self.font_btn.render("PLAY", False, (255, 255, 255))
@@ -20,9 +20,9 @@ class TitleScreen:
     def draw(self, window):
         window.fill((0, 0, 0))
         window.blit(self.menu_img, self.menu_rec)
-        window.blit(self.tittle_img, (220, -70))
+        # window.blit(self.tittle_img, (270, -70))
         pygame.draw.rect(window, self.color_btn, self.rec_btn)
-        window.blit(self.surface_text_btn, (350, 450))
+        window.blit(self.surface_text_btn, (412, 443))
 
         pygame.display.update()
 

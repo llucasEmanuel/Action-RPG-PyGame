@@ -7,22 +7,19 @@ class Player:
         self.width = 50
         self.height = 60
         self.color = (209, 104, 227)
-        self.rec = pygame.Rect(400, 400, self.width, self.height)
+        # O jogador é gerado no ar e cai até atingir uma plataforma
+        self.rec = pygame.Rect(210, 300, self.width, self.height)
 
-        # Atributos do movimento horizontal (andando)
-        self.going_right = False
-        self.going_left = False
+        # Vetor que indica a a direção da velocidade
+        self.velocity = pygame.math.Vector2(0, 0)
+        self.speed = 7
+
+        # Atributos do movimento (andando)
         self.last_key = None  # Indica a última tecla pressionada
-        self.vx = 8  # Velocidade horizontal
-
-        # Atributos do movimento vertical (pulando)
-        self.jumping = False
-        self.g = 1.2  # Gravidade
-        self.vy = -14  # Velocidade inicial do pulo
 
         # Atributos do ataque
         self.attacking = False
-        self.attack_count = 0 # tempo em que o ataque ocorre
+        self.attack_count = 0 # Tempo em que o ataque ocorre
         self.sword_rec = pygame.Rect(0, 0, 0, 0)
 
         # Atributos de vida e hit
@@ -35,43 +32,80 @@ class Player:
         # Pontuação
         self.pts = 0
 
+        # Carrega os sprites do jogador e os armazena em um dicionário
+        self.sprites_dict = {
+            "up": {
+                "idle": pygame.image.load("assets/sprites/felicia/felicia_up_idle.png"),
+            },
+            "down": {
+                "idle": pygame.image.load("assets/sprites/felicia/felicia_down_idle.png"),
+            },
+            "left": {
+                "idle": pygame.image.load("assets/sprites/felicia/felicia_left_idle.png"),
+            },
+            "right": {
+                "idle": pygame.image.load("assets/sprites/felicia/felicia_right_idle.png"),
+            },
+        }
+
+        self.state = "idle"
+        self.direction = "right"
+        self.curr_sprite = self.sprites_dict["right"]["idle"]
+
+    # Gerencia a movimentação do jogador
     def move(self):
-        # Movimentação baseada na última tecla pressionada
-        if self.going_right and self.last_key == 'd':
-            self.walk_right()
-        elif self.going_left and self.last_key == 'a':
-            self.walk_left()
+        # Reseta a velocidade e os boolanos de direção
+        self.velocity = pygame.math.Vector2(0, 0)
 
-    def walk_right(self):
-        self.rec.x += self.vx
+        # Direção da velocidade
+        dv = pygame.math.Vector2(0, 0)
 
-    def walk_left(self):
-        self.rec.x -= self.vx
+        # Seleciona a direção em que o jogador vai andar
+        key = pygame.key.get_pressed()
 
-    def start_jump(self):
-        if not self.jumping:
-            self.jumping = True
-            self.vy = -14
+        if key[pygame.K_w]:
+            dv.y -= 1
+            self.last_key = 'w'
+            self.direction = "up"
+
+        if key[pygame.K_s]:
+            dv.y += 1
+            self.last_key = 's'
+            self.direction = "down"
+
+
+        if key[pygame.K_a]:
+            dv.x -= 1
+            self.last_key = 'a'
+            self.direction = "left"
+
+        if key[pygame.K_d]:
+            dv.x += 1
+            self.last_key = 'd'
+            self.direction = "right"
+
         
-    def jump(self):
-        # Lógica do pulo
-        if self.jumping:
-            self.rec.y += self.vy
-            self.vy += self.g
-            # Checa se atingiu o chão (400 é a posição do chão)
-            if self.rec.y >= 400:
-                self.rec.y = 400
-                self.jumping = False
-                self.vy = 0
+        # Checa se existe velocidade em alguma direção, se não a velocidade continua 0, pois foi resetada no início do método
+        if dv.length() > 0:
+            # Normaliza o vetor dv para conservar o módulo da velocidade em todas as direções
+            self.velocity = dv.normalize() * self.speed
+
+        # Atualiza a posição do retângulo
+        self.rec.x += self.velocity.x
+        self.rec.y += self.velocity.y
 
     def draw_sword(self, window):
         if self.attacking:
-            # Se o jogador estiver indo para a esquerda, ataca a esquerda
-            if self.last_key == 'a':
-                self.sword_rec = pygame.Rect(self.rec.x - self.rec.width + 10, self.rec.y + self.rec.height/3, 40, 15)
-            # Caso contrário, independente da última tecla, ataca para a direita
+            # Desenha a espada dependendo da posição para onde o jogador anda
+            if self.last_key == 'w':
+                self.sword_rec = pygame.Rect(self.rec.x + self.rec.width/3 + 2, self.rec.y - 30, 15, 32)
+            elif self.last_key == 's':
+                self.sword_rec = pygame.Rect(self.rec.x + self.rec.width/3 + 2, self.rec.y + self.rec.height, 15, 32)
+            elif self.last_key == 'a':
+                self.sword_rec = pygame.Rect(self.rec.x - self.rec.width + 17, self.rec.y + self.rec.height/3, 40, 15)
+            # Caso contrário, ataca para a direita
             else:
-                self.sword_rec = pygame.Rect(self.rec.x + self.rec.width, self.rec.y + self.rec.height/3, 40, 15)
+                self.sword_rec = pygame.Rect(self.rec.x + self.rec.width - 1, self.rec.y + self.rec.height/3, 40, 15)
 
             pygame.draw.rect(window, (191, 191, 191), self.sword_rec)
         else:
@@ -87,7 +121,11 @@ class Player:
 
     def draw(self, window: pygame.Surface):
         if not self.is_dead:
-            pygame.draw.rect(window, self.color, self.rec)
+            self.curr_sprite = self.sprites_dict[self.direction][self.state]
+            pygame.draw.rect(window, self.color, self.rec, 1)
+            self.rec.width = self.curr_sprite.get_width()
+            self.rec.height = self.curr_sprite.get_height()
+            window.blit(self.curr_sprite, (self.rec.x, self.rec.y))
 
     def take_damage(self, damage):
         if not self.is_invincible:
@@ -103,24 +141,18 @@ class Player:
                 # 50 segundos de invencibilidade
                 self.is_invincible = True
 
-    def damage_move(self, enemy):
-        # Se colidiu com a metade direita do inimigo, então vai para a direita
-        if self.rec.x > enemy.rec.x:
-            self.rec.x += 3
-        # Caso contrário vai para a esquerda
-        else:
-            self.rec.x -= 3
-
-        self.damage_timeout -= 1
-        if self.damage_timeout <= 0:
-            self.is_invincible = False
-
     def update(self, window: pygame.Surface, enemy):
+        # Se o jogador morreu, resetar ele
+        if self.is_dead:
+            self.__init__()
+            return
+        
+        self.draw(window)
+
         if not self.is_invincible:
             self.move()
-            self.jump()
             self.attack(window)
         else:
-            self.damage_move(enemy)
+            ...#self.damage_move(enemy)
+            
 
-        self.draw(window)

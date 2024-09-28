@@ -4,13 +4,15 @@ from sys import exit
 from player import Player
 from enemy import StaticEnemy
 from ui import HUD, TitleScreen
+from physics import Physics
+from levels import Tilemap
 import collisions
 
 # Inicialização da lib
 pygame.init()
 
 # Constantes que armazenam informações da janela
-WINDOW_WIDTH = 800
+WINDOW_WIDTH = 900
 WINDOW_HEIGHT = 600
 WINDOW_TITLE = "Action RPG Game"
 
@@ -30,6 +32,11 @@ player = Player()
 enemy = StaticEnemy()
 hud = HUD()
 tittle_screen = TitleScreen()
+physics = Physics(player)
+tilemap = Tilemap()
+
+# Carrega o tilemap
+tilemap.load("assets/tilemaps/tilemap.txt")
 
 # Loop principal que roda o jogo
 while True:
@@ -49,56 +56,59 @@ while True:
             if tittle_screen.rec_btn.collidepoint(pygame.mouse.get_pos()):
                 goto_tittle = False
             
-        
         # Checa se apertou alguma tecla
         if event.type == pygame.KEYDOWN:
-            # [SPACE] = pula
-            if event.key == pygame.K_SPACE:
-                player.start_jump()
-            # [D] = anda para a direita
-            if event.key == pygame.K_d:
-                player.going_right = True
-                player.last_key = 'd'  # Atualiza a última tecla pressionada
-            # [A] = anda para a esquerda
-            if event.key == pygame.K_a:
-                player.going_left = True
-                player.last_key = 'a'  # Atualiza a última tecla pressionada
+            # # [SPACE] = pula
+            # if event.key == pygame.K_SPACE:k
+            #     player.set_jump()
+            # # [D] = anda para a direita
+            # if event.key == pygame.K_d:
+            #     player.going_right = True
+            #     player.last_key = 'd'  # Atualiza a última tecla pressionada
+            # # [A] = anda para a esquerda
+            # if event.key == pygame.K_a:
+            #     player.going_left = True
+            #     player.last_key = 'a'  # Atualiza a última tecla pressionada
             # [K] = ataca (usa uma espada de início)
             if event.key == pygame.K_k and not player.attacking and not player.is_dead:
                 player.attacking = True
                 player.attack_count = 10
 
+        # # Detecta as teclas que foram soltas
+        # elif event.type == pygame.KEYUP:
+        #     if event.key == pygame.K_d:
+        #         player.going_right = False
+        #         # Verifica se a tecla A ainda está pressionada para ajustar a direção
+        #         if pygame.key.get_pressed()[pygame.K_a]:
+        #             player.last_key = 'a'
+        #     if event.key == pygame.K_a:
+        #         player.going_left = False
+        #         # Verifica se a tecla D ainda está pressionada para ajustar a direção
+        #         if pygame.key.get_pressed()[pygame.K_d]:
+        #             player.last_key = 'd'
 
-        # Detecta as teclas que foram soltas
-        elif event.type == pygame.KEYUP:
-            if event.key == pygame.K_d:
-                player.going_right = False
-                # Verifica se a tecla A ainda está pressionada para ajustar a direção
-                if pygame.key.get_pressed()[pygame.K_a]:
-                    player.last_key = 'a'
-            if event.key == pygame.K_a:
-                player.going_left = False
-                # Verifica se a tecla D ainda está pressionada para ajustar a direção
-                if pygame.key.get_pressed()[pygame.K_d]:
-                    player.last_key = 'd'
-
+    # Se a flag de ir para a tela de título for ativada
     if goto_tittle:
+        # Gera a tela de título
         tittle_screen.draw(window)
         if tittle_screen.rec_btn.collidepoint(pygame.mouse.get_pos()):
             tittle_screen.color_btn = (0, 30, 20)
         else:
             tittle_screen.color_btn = (0, 50, 43)
+        # Não executa as outras operações, pois são desnecessárias nesse estado
         continue
 
-    # Limpa o fundo da tela (Desenhar só depois dessa linha)
-    window.fill((86, 106, 153))
-
-    # Desenha a linha do chão (use isto temporariamente)
-    pygame.draw.line(window, (0, 0, 0), (0, 400 + 60), (800, 400 + 60))
+    
+    # Desenha o tilemap e retorna uma lista de plataformas em que há colisão
+    platforms = tilemap.draw(window)
 
     # Desenha inimigo
     enemy.update(window)
 
+    # AINDA É PRECISO RESETAR O STATUS DO INIMIGO QUANDO O PLAYER MORRE (adicionar flag de game over?)
+    # Se o jogador morrer, volta para a tela de titulo
+    if player.is_dead:
+        goto_tittle = True
     # Atualiza o estado do jogador (movimento, pulo, etc.)
     player.update(window, enemy)
 
