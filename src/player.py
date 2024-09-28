@@ -35,16 +35,16 @@ class Player:
         # Carrega os sprites do jogador e os armazena em um dicionário
         self.sprites_dict = {
             "up": {
-                "idle": pygame.image.load("assets/felicia_up1.png"),
+                "idle": pygame.image.load("assets/sprites/felicia/felicia_up_idle.png"),
             },
             "down": {
-                "idle": pygame.image.load("assets/felicia_down1.png"),
+                "idle": pygame.image.load("assets/sprites/felicia/felicia_down_idle.png"),
             },
             "left": {
-                "idle": pygame.image.load("assets/felicia_left1.png"),
+                "idle": pygame.image.load("assets/sprites/felicia/felicia_left_idle.png"),
             },
             "right": {
-                "idle": pygame.image.load("assets/felicia_right1.png"),
+                "idle": pygame.image.load("assets/sprites/felicia/felicia_right_idle.png"),
             },
         }
 
@@ -102,10 +102,10 @@ class Player:
             elif self.last_key == 's':
                 self.sword_rec = pygame.Rect(self.rec.x + self.rec.width/3 + 2, self.rec.y + self.rec.height, 15, 32)
             elif self.last_key == 'a':
-                self.sword_rec = pygame.Rect(self.rec.x - self.rec.width + 10, self.rec.y + self.rec.height/3, 40, 15)
+                self.sword_rec = pygame.Rect(self.rec.x - self.rec.width + 17, self.rec.y + self.rec.height/3, 40, 15)
             # Caso contrário, ataca para a direita
             else:
-                self.sword_rec = pygame.Rect(self.rec.x + self.rec.width, self.rec.y + self.rec.height/3, 40, 15)
+                self.sword_rec = pygame.Rect(self.rec.x + self.rec.width - 1, self.rec.y + self.rec.height/3, 40, 15)
 
             pygame.draw.rect(window, (191, 191, 191), self.sword_rec)
         else:
@@ -122,7 +122,9 @@ class Player:
     def draw(self, window: pygame.Surface):
         if not self.is_dead:
             self.curr_sprite = self.sprites_dict[self.direction][self.state]
-            pygame.draw.rect(window, self.color, self.rec)
+            pygame.draw.rect(window, self.color, self.rec, 1)
+            self.rec.width = self.curr_sprite.get_width()
+            self.rec.height = self.curr_sprite.get_height()
             window.blit(self.curr_sprite, (self.rec.x, self.rec.y))
 
     def take_damage(self, damage):
@@ -145,6 +147,8 @@ class Player:
             self.__init__()
             return
         
+        self.draw(window)
+
         if not self.is_invincible:
             self.move()
             self.attack(window)
@@ -152,4 +156,3 @@ class Player:
             ...#self.damage_move(enemy)
             
 
-        self.draw(window)
