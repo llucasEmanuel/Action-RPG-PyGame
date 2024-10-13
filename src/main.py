@@ -24,6 +24,9 @@ pygame.display.set_caption(WINDOW_TITLE)
 clk = pygame.time.Clock()
 FPS = 35
 
+# Inicializa o mixer
+pygame.mixer.init()
+
 # Variáveis auxiliares
 goto_tittle = True
 
@@ -54,6 +57,7 @@ while True:
         if event.type == pygame.MOUSEBUTTONDOWN and goto_tittle:
             # Detecta o clique do mouse no botão de play da tela de início
             if tittle_screen.rec_btn.collidepoint(pygame.mouse.get_pos()):
+                tittle_screen.stop_song()
                 goto_tittle = False
             
         # Checa se apertou alguma tecla
@@ -91,6 +95,7 @@ while True:
     if goto_tittle:
         # Gera a tela de título
         tittle_screen.draw(window)
+        tittle_screen.play_song()
         if tittle_screen.rec_btn.collidepoint(pygame.mouse.get_pos()):
             tittle_screen.color_btn = (0, 30, 20)
         else:

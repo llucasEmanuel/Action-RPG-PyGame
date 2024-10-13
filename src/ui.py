@@ -15,7 +15,22 @@ class TitleScreen:
         self.color_btn = (0, 50, 43)
         self.font_btn = pygame.font.SysFont("arial", 45)
         self.surface_text_btn = self.font_btn.render("PLAY", False, (255, 255, 255))
-        
+
+        self.is_song_playing = False
+
+    def play_song(self):
+        if not self.is_song_playing:
+            self.is_song_playing = True
+            pygame.mixer.music.load("assets/soundtrack/tittle_song.mp3")
+            pygame.mixer.music.set_volume(0.5)
+            # Toca a música infinitamente
+            pygame.mixer.music.play(loops=-1)
+
+    def stop_song(self):
+        if self.is_song_playing:
+            self.is_song_playing = False
+            pygame.mixer.music.stop()
+
 
     def draw(self, window):
         window.fill((0, 0, 0))
