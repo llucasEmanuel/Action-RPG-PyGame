@@ -26,6 +26,9 @@ FPS = 35
 
 # Inicializa o mixer
 pygame.mixer.init()
+# Música da primeira fase (TESTE)
+is_song_playing = False
+
 
 # Variáveis auxiliares
 goto_tittle = True
@@ -93,6 +96,9 @@ while True:
 
     # Se a flag de ir para a tela de título for ativada
     if goto_tittle:
+        if is_song_playing:
+            pygame.mixer.music.stop()
+            is_song_playing = False
         # Gera a tela de título
         tittle_screen.draw(window)
         tittle_screen.play_song()
@@ -102,6 +108,11 @@ while True:
             tittle_screen.color_btn = (0, 50, 43)
         # Não executa as outras operações, poisa são desnecessárias nesse estado
         continue
+    elif not is_song_playing:
+        is_song_playing = True
+        pygame.mixer.music.load("assets/level1_song.mp3")
+        pygame.mixer.music.set_volume(0.5)
+        pygame.mixer.music.play(loops=-1)
 
     # Desenha o tilemap e retorna uma lista de plataformas em que há colisão
     platforms = tilemap.draw(window)
